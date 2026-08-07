@@ -1,12 +1,15 @@
 [workspace]
 resolver = "3"
 
-# Exactly three members, one per layer of docs/adr/0005-layering.md. Adding a
-# fourth is a change to that record first and to this list second.
+# Three shipped members, one per layer of docs/adr/0005-layering.md, and one
+# member that ships to nobody. Adding a shipped one is a change to that record
+# first and to this list second; the record says which is which and why the
+# distinction exists.
 members = [
     "crates/indexwerk-core",
     "crates/indexwerk-ffi",
     "crates/indexwerk-python",
+    "crates/indexwerk-checks",
 ]
 
 # No `license` or `license-file` key: the licence is an open decision on the
