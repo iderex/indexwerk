@@ -9,13 +9,13 @@
 // the generated header, are #34. Nothing of that is here yet.
 
 // The MSVC linker prints an informational line on stdout whenever it produces
-// an import library for a cdylib, in the host's language, and `linker_messages`
-// reports that line as a warning. It says nothing about this code and it cannot
-// be removed by changing this code, so it is allowed here with the reason
-// written down rather than left to red the Windows leg of a gate that treats
-// warnings as errors. The allow is per crate and per lint, so a genuine linker
-// warning in any other crate is still a warning.
-#![allow(linker_messages)]
+// an import library for a cdylib, in the host's language, and the
+// `linker_messages` lint reports that line as a warning. It says nothing about
+// this code and no change to this code removes it. It is not allowed here,
+// because `linker_messages` does not exist on every toolchain this workspace
+// has to build on and an allow of a lint a compiler does not know is itself a
+// warning. Where the exception is needed it is granted per job, on the leg that
+// meets it, and the reason is written there.
 
 //! The C interface to the canonicalisation core.
 //!
