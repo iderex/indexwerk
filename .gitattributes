@@ -1,0 +1,49 @@
+# Line endings, settled before they cost anything (#13).
+#
+# This project is developed on Windows and built on Linux. Without a policy in
+# the tree, a checkout on one platform reports every text file as modified on
+# the other, and a real formatting defect becomes indistinguishable from that
+# noise. The formatting checks are configured to agree with this file rather
+# than to fight it.
+#
+# The default: git decides what is text, stores it with LF, and checks it out
+# with LF everywhere. `eol=lf` overrides `core.autocrlf`, so the working tree is
+# the same bytes whatever a contributor's git is configured to do, which is what
+# makes the policy a property of the tree rather than of each clone.
+* text=auto eol=lf
+
+# Spelled out for the kinds this tree actually holds, so that a reader does not
+# have to work out what `text=auto` decided for a given file.
+*.rs            text eol=lf
+*.toml          text eol=lf
+*.lock          text eol=lf
+*.md            text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.py            text eol=lf
+*.pyi           text eol=lf
+*.h             text eol=lf
+*.c             text eol=lf
+*.json          text eol=lf
+*.txt           text eol=lf
+.gitattributes  text eol=lf
+.editorconfig   text eol=lf
+
+# Anything whose bytes have to survive a round trip exactly is declared here as
+# not text, so that nothing normalises it. Images and archives are the obvious
+# cases.
+*.png           binary
+*.jpg           binary
+*.gz            binary
+*.zip           binary
+
+# The conformance vectors of the normal form are the case this policy exists
+# for, and they are NOT declared here. A canonicalisation fixture whose bytes
+# are rewritten on checkout is a fixture that proves the wrong thing, and a
+# fixture that exists to carry a carriage return would be silently emptied by
+# the default above. Their format and their location are decided in the normal
+# form decision record, issue #6, which has not landed, so there is no path here
+# to declare and a pattern guessed now would be a claim about a decision that
+# has not been made. When #6 lands, whichever files have to be byte-exact are
+# added here as `-text` in the same change. Until then this policy does not
+# cover them, and that is a gap rather than an omission.

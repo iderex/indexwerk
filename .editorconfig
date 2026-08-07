@@ -1,0 +1,36 @@
+# Editor settings, matched to the formatter rather than chosen separately, so
+# that an editor and the formatter do not disagree and every save is not a
+# whitespace diff (#13).
+#
+# The end-of-line setting agrees with `.gitattributes`, which stores and checks
+# out LF everywhere.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# rustfmt's defaults, which this project does not override: four spaces, no
+# tabs, and a hard wrap at 100 columns.
+[*.rs]
+indent_size = 4
+max_line_length = 100
+
+[*.{toml,json}]
+indent_size = 4
+
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown uses two trailing spaces for a hard line break, so trailing
+# whitespace is left alone here rather than stripped by an editor that has no
+# way to tell the two apart.
+[*.md]
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab
