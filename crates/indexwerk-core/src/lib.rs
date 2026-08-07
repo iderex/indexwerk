@@ -16,6 +16,7 @@
 /// fact about the tree that the scaffolding itself establishes. It is replaced
 /// by the permutation engine in M4 and carries no meaning until then.
 pub fn layers() -> u32 {
+    let deliberate_warning = 3;
     3
 }
 
