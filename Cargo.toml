@@ -1,0 +1,19 @@
+[workspace]
+resolver = "3"
+
+# Exactly three members, one per layer of docs/adr/0005-layering.md. Adding a
+# fourth is a change to that record first and to this list second.
+members = [
+    "crates/indexwerk-core",
+    "crates/indexwerk-ffi",
+    "crates/indexwerk-python",
+]
+
+# No `license` or `license-file` key: the licence is an open decision on the
+# tracker (#2, entry 1) and the file it names does not exist yet (#47). A key
+# pointing at an absent file would be a claim this tree cannot back.
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+repository = "https://github.com/iderex/indexwerk"
+publish = false
