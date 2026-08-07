@@ -1,0 +1,3 @@
+# Cargo's build directory. It is regenerated from the tracked sources and the
+# lockfile, so tracking it would put machine-specific artefacts in every diff.
+/target

@@ -46,6 +46,28 @@ Otherwise the other consumers named in the roadmap never arrive. The measure of
 whether the C interface is adequate is whether the Python package needed to
 cheat, and that measure only works if cheating is impossible.
 
+## The names
+
+The three layers are three workspace members and no more. Their names are fixed
+here rather than in the manifest, because the manifest is where they are used
+and this is where they are argued about.
+
+| Layer | Crate | Directory |
+| --- | --- | --- |
+| Core | `indexwerk-core` | `crates/indexwerk-core` |
+| Foreign interface | `indexwerk-ffi` | `crates/indexwerk-ffi` |
+| Python package | `indexwerk-python` | `crates/indexwerk-python` |
+
+The foreign-interface crate builds a library called `indexwerk`, and every
+symbol it exports carries the `indexwerk_` prefix so that linking alongside
+another tensor library does not collide.
+
+The layering rule is visible in the manifests rather than only in this
+paragraph. `indexwerk-python` declares `indexwerk-ffi` as its only dependency
+and does not declare `indexwerk-core`, so reaching past the C interface is a
+line somebody has to add to a manifest rather than something that happens by
+accident.
+
 ## What follows from this record elsewhere
 
 The workspace created in M2 has exactly this shape, and a check in M8 refuses an

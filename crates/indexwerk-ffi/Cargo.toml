@@ -1,0 +1,16 @@
+[package]
+name = "indexwerk-ffi"
+description = "The C interface, and the only crate in this workspace allowed unsafe code."
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[lib]
+name = "indexwerk"
+# rlib so the workspace can link it, cdylib and staticlib because a C interface
+# that is never built as one is not a C interface.
+crate-type = ["rlib", "cdylib", "staticlib"]
+
+[dependencies]
+indexwerk-core = { path = "../indexwerk-core" }

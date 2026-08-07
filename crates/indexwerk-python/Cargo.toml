@@ -1,0 +1,14 @@
+[package]
+name = "indexwerk-python"
+description = "The Python package, built on the C interface with no privileged access to the core."
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+# `indexwerk-core` is deliberately absent from this list and stays absent. The
+# Python layer reaches the core through the C interface or not at all, which is
+# docs/adr/0005-layering.md. If this layer needs something the C interface
+# cannot express, the repair is to widen that interface, not to add a line here.
+[dependencies]
+indexwerk-ffi = { path = "../indexwerk-ffi" }
