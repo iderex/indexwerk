@@ -58,9 +58,29 @@ and this is where they are argued about.
 | Foreign interface | `indexwerk-ffi` | `crates/indexwerk-ffi` |
 | Python package | `indexwerk-python` | `crates/indexwerk-python` |
 
+Those three are the shipped set. The workspace also carries `indexwerk-checks`,
+which is not a layer; the section below says why that is not an exception to
+anything.
+
 The foreign-interface crate builds a library called `indexwerk`, and every
 symbol it exports carries the `indexwerk_` prefix so that linking alongside
 another tensor library does not collide.
+
+### Tooling is not a layer
+
+The workspace may also hold members that ship to nobody, and those are not
+layers. `indexwerk-checks` is the first: it holds the checks over this tree that
+the compiler cannot make, it is never published, and no shipped crate depends on
+it. It is inside the workspace rather than beside it so that one command builds
+it, one command tests it, and it is covered by the same gate as everything else,
+which is what "does the artefact need a parallel apparatus nobody will maintain"
+asks about.
+
+The distinction is what the rules above attach to. The three layers are the
+shipped set. A member that ships to nobody adds no consumer, exports no
+interface and cannot let the Python layer reach past the C interface, so it
+changes none of the three rules. Adding a member to the shipped set is a change
+to this record first and to the manifest second. Adding tooling is not.
 
 The layering rule is visible in the manifests rather than only in this
 paragraph. `indexwerk-python` declares `indexwerk-ffi` as its only dependency

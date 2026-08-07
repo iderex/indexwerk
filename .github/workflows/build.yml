@@ -76,6 +76,21 @@ jobs:
           rustup toolchain install "$PINNED_TOOLCHAIN" --profile minimal --no-self-update
           rustup default "$PINNED_TOOLCHAIN"
           rustc --version
+      - name: Report the display and elevation state of this runner
+        # The headless and unelevated birth requirement of #17 is a claim about
+        # where the suite runs, so the state is printed in the log rather than
+        # asserted in a document. It is read, never changed: nothing here sets
+        # DISPLAY, drops privilege, or asks for any.
+        run: |
+          set -euo pipefail
+          echo "DISPLAY=${DISPLAY:-unset}"
+          echo "WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-unset}"
+          echo "user=$(id -un) uid=$(id -u)"
+          if [ "$(id -u)" -eq 0 ]; then
+            echo "this runner is root"
+          else
+            echo "this runner is not root"
+          fi
       - name: Run the whole test suite
         run: cargo test --workspace --locked
 
@@ -125,6 +140,18 @@ jobs:
           rustup toolchain install "$PINNED_TOOLCHAIN" --profile minimal --no-self-update
           rustup default "$PINNED_TOOLCHAIN"
           rustc --version
+      - name: Report the elevation state of this runner
+        # Same purpose as the Linux leg. The query is read-only: it asks the
+        # current token whether it is in the Administrators role and changes
+        # nothing. It does not request elevation and cannot raise a consent
+        # prompt.
+        shell: pwsh
+        run: |
+          $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+          $principal = [Security.Principal.WindowsPrincipal]::new($identity)
+          $admin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+          Write-Output "user=$($identity.Name)"
+          Write-Output "elevated=$admin"
       - name: Run the whole test suite
         shell: bash
         run: cargo test --workspace --locked
