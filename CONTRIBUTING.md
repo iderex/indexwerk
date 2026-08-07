@@ -62,6 +62,6 @@ to be added.
 
 ## The checks a change runs
 
-The workflows in `.github/workflows/` produce them. Writing the list down with
-each check's exact name is issue #19 and has not been done yet, so until it is,
-the workflow files are the authority for what runs.
+`docs/required-checks.md` lists them by their exact names, with the workflow file
+that produces each one, and says which ones are not required and why. The list is
+not restated here, because a list in two places drifts.
