@@ -16,9 +16,6 @@
 /// fact about the tree that the scaffolding itself establishes. It is replaced
 /// by the permutation engine in M4 and carries no meaning until then.
 pub fn layers() -> u32 {
-    // Deliberate violation, removed by the next commit: this is the kind of
-    // line the headless and unelevated check exists to refuse.
-    let _address = "0.0.0.0:8080";
     3
 }
 
