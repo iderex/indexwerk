@@ -32,6 +32,9 @@ tree, and it is not made by the change that adds this file.
 | `build (floor toolchain)` | `.github/workflows/build.yml` |
 | `test (floor toolchain)` | `.github/workflows/build.yml` |
 | `test (windows)` | `.github/workflows/build.yml` |
+| `format` | `.github/workflows/lint.yml` |
+| `format (windows)` | `.github/workflows/lint.yml` |
+| `lint` | `.github/workflows/lint.yml` |
 | `DCO sign-off` | `.github/workflows/dco.yml` |
 | `Reject Trojan Source Unicode` | `.github/workflows/unicode-guard.yml` |
 | `dependency-review` | `.github/workflows/dependency-review.yml` |
@@ -44,6 +47,14 @@ every greppable invariant, and a name that also carried the rest of the
 workspace would report a broken invariant and a failing unit test as the same
 red. What that leg enforces is listed in `docs/invariants.md`, which is
 rendered by the check rather than written beside it.
+
+The two format names say which platform they ran on, for the reason #16 gives:
+a formatter default that assumes one platform reports a whole clean tree as
+failing on the other, and the only way to know this one does not is to run it on
+both. `format` also runs a check the `test` leg already runs, in
+`crates/indexwerk-checks/tests/formatting.rs`, and the duplication is deliberate
+in the same way `invariants` is: a formatting failure and a failing unit test
+should not arrive as the same red.
 
 The two floor names say which compiler they ran on rather than only that they
 ran, because a reader of this list has to be able to tell the leg that exercises
@@ -72,10 +83,8 @@ These names are fixed in their issues and have no check run yet, so they cannot
 be required. They are listed so that their absence reads as owed rather than as
 decided against.
 
-| Check name | Owed by | State |
-| --- | --- | --- |
-| `format` | #16 | The workflow that would produce it does not exist. |
-| `lint` | #16 | The workflow that would produce it does not exist. |
+Nothing is in this state today. `format` and `lint` were, until
+`.github/workflows/lint.yml` landed and produced them.
 
 ## Does not run on a pull request, by design
 

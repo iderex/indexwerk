@@ -21,6 +21,7 @@
 //! in the gate, so that the suite reports what it did not cover rather than
 //! leaving a green run to be read as covering everything.
 
+pub mod formatting;
 pub mod harness;
 pub mod terms;
 
@@ -175,7 +176,7 @@ pub fn scan_text(relative_path: &str, text: &str) -> Vec<Finding> {
         found.extend(unsourced_performance_numbers(relative_path, &lines));
     }
 
-    found.sort_by(|a, b| a.line.cmp(&b.line));
+    found.sort_by_key(|finding| finding.line);
     found
 }
 
@@ -346,7 +347,7 @@ pub fn scan_workspace() -> Vec<Finding> {
     }
 
     findings.extend(crate_roots_missing_the_refusal(&root));
-    findings.sort_by(|a, b| (a.file.clone(), a.line).cmp(&(b.file.clone(), b.line)));
+    findings.sort_by(|a, b| (a.file.as_str(), a.line).cmp(&(b.file.as_str(), b.line)));
     findings
 }
 

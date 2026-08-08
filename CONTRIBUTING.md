@@ -175,6 +175,60 @@ commit that lacks a matching trailer. The text of the certificate itself is not
 in this tree yet; the workflow that enforces it points at a file that has still
 to be added.
 
+## Formatting and lint
+
+Two check runs, separate from the build, so that a formatting failure does not
+hide a compile failure. Both reproduce locally, and on a clean clone both
+produce no output and exit zero.
+
+The format leg:
+
+    cargo fmt --all -- --check
+    cargo test -p indexwerk-checks --locked --test formatting
+
+The lint leg:
+
+    cargo clippy --workspace --locked --all-targets -- -D warnings
+
+Denied rather than warned. A lint that only warns is a lint nobody fixes, and
+`--all-targets` reaches the tests, which are most of the code here.
+
+### Why the second format command is not a formatter
+
+`cargo fmt` reads Rust and nothing else, and this tree is mostly Markdown. The
+rest of the format leg is `crates/indexwerk-checks`, in the tree rather than in
+a workflow file, so a contributor runs exactly what the gate runs.
+
+It is not a Markdown formatter and it does not reflow anything. It judges
+whitespace: a tab, trailing blanks that are not the two spaces of a hard line
+break, a line that looks empty and is not, a missing final newline, a blank line
+at the end. Those are worth judging because they are invisible, which is also
+why nothing else catches them.
+
+Two things it deliberately does not judge, each because judging it would cost
+more than it is worth.
+
+Line endings. `.gitattributes` stores and checks out LF everywhere and is the
+authority for it. A working tree can carry carriage returns while the committed
+bytes are LF, because a checkout predating a rule in that file is not rewritten,
+and a check that judged line endings would report exactly that clean tree as
+failing. So a carriage return is removed from each line before the line is
+judged. `format (windows)` runs the same check on the other platform, which is
+how that is demonstrated rather than asserted.
+
+Line length. This tree wraps prose at eighty columns by hand, and twenty lines
+do not: a generated document, a paragraph written as one line on purpose, and
+links that cannot be broken. Reflowing those is a different change with a
+different argument.
+
+### Python
+
+There is no Python source in this tree and no Python formatter configured. Those
+two facts are only consistent together, so the format leg lists the Python
+sources and reds if it finds any, naming the files. The change that brings the
+first `.py` file chooses a formatter for it and adds it to the leg and to the
+commands above.
+
 ## The checks a change runs
 
 `docs/required-checks.md` lists them by their exact names, with the workflow file
