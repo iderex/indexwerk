@@ -1,0 +1,21 @@
+# The compiler a clone of this repository gets, and the one the gate uses (#12).
+#
+# rustup reads this file before it reads its own default, so a contributor with
+# a different default toolchain still builds with this one, and it installs the
+# version named here on first use. That is what makes "it works on my machine"
+# a statement about the same compiler on both machines.
+#
+# This is the only place the pinned version is written. The build workflow used
+# to carry it as well, which is two numbers that had to be moved together and
+# one of them would eventually not be.
+#
+# No `profile` and no `components` key. Setting `profile = "minimal"` here would
+# take rustfmt and clippy away from a contributor whose rustup installed them by
+# default, which is the opposite of helpful, and the gate installs what each of
+# its legs needs regardless.
+#
+# The floor is not here. It is `rust-version` in the workspace manifest, because
+# that is the key cargo itself refuses a too-old compiler on, and the floor leg
+# of the gate reads it from there.
+[toolchain]
+channel = "1.97.0"

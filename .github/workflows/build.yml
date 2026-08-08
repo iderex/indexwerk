@@ -1,14 +1,22 @@
 # The first gate leg, and the one every other leg assumes (#15).
 #
-# Four check runs, named exactly as #15 fixes them: `build`, `test`,
-# `build (floor toolchain)` and `test (windows)`. A required check is matched by
-# its literal name, so a job renamed here silently stops being required and
-# nothing reports that it happened. If a name changes, the required check list
-# kept in the tree changes in the same pull request. That list is #19.
+# Five check runs, named exactly as #15 and #12 fix them: `build`, `test`,
+# `build (floor toolchain)`, `test (floor toolchain)` and `test (windows)`. A
+# required check is matched by its literal name, so a job renamed here silently
+# stops being required and nothing reports that it happened. If a name changes,
+# the required check list kept in the tree changes in the same pull request.
+# That list is #19.
 #
 # The toolchain is installed with rustup rather than with a third-party action,
 # so this workflow adds no action to the supply chain beyond the checkout that
 # the tree already carries.
+#
+# Neither version number is written here (#12). The pinned compiler is
+# `rust-toolchain.toml`, which rustup reads and installs on its own, so the legs
+# below name no version and simply run cargo. The floor is `rust-version` in the
+# workspace manifest, and the floor legs read it out of that file. Two copies of
+# a number are two things that have to move together, and the copy in a workflow
+# is the one nobody remembers.
 name: Build
 
 on:
@@ -27,14 +35,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # The pinned toolchain. #12 is where the pin and the minimum supported
-  # versions are declared and where this number moves; until it lands this
-  # workflow is the only place either number exists, which is why both are here
-  # rather than spelled into each job.
-  PINNED_TOOLCHAIN: "1.97.0"
-  # The floor. Edition 2024 puts it no lower than 1.85, which is the reason for
-  # this value rather than a preference. #12 owns it.
-  FLOOR_TOOLCHAIN: "1.85.0"
   # Warnings are errors, so a warning cannot accumulate quietly until nobody
   # reads the output.
   RUSTFLAGS: "-D warnings"
@@ -50,11 +50,13 @@ jobs:
         with:
           # No step pushes via git, so do not persist the GITHUB_TOKEN in .git/config.
           persist-credentials: false
-      - name: Install the pinned toolchain
+      - name: Report the toolchain rust-toolchain.toml selected
+        # rustup installs the pinned channel on the first shim call and prints
+        # what it selected. Printing it is how the log says which compiler ran,
+        # rather than which one this file hoped for.
         run: |
           set -euo pipefail
-          rustup toolchain install "$PINNED_TOOLCHAIN" --profile minimal --no-self-update
-          rustup default "$PINNED_TOOLCHAIN"
+          rustup show active-toolchain
           rustc --version
       - name: Build the workspace with the lockfile frozen
         # --locked refuses to update Cargo.lock, so a manifest change that would
@@ -70,11 +72,10 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install the pinned toolchain
+      - name: Report the toolchain rust-toolchain.toml selected
         run: |
           set -euo pipefail
-          rustup toolchain install "$PINNED_TOOLCHAIN" --profile minimal --no-self-update
-          rustup default "$PINNED_TOOLCHAIN"
+          rustup show active-toolchain
           rustc --version
       - name: Report the display and elevation state of this runner
         # The headless and unelevated birth requirement of #17 is a claim about
@@ -103,14 +104,61 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install the floor toolchain
+      - name: Select the declared floor, and refuse if it is not what runs
+        # rust-toolchain.toml outranks `rustup default`, so a floor leg that
+        # only ran `rustup default` would build on the pinned compiler while
+        # reporting itself as the floor. RUSTUP_TOOLCHAIN outranks the file,
+        # which is why it is used, and the comparison below is what makes the
+        # override load bearing rather than believed.
         run: |
           set -euo pipefail
-          rustup toolchain install "$FLOOR_TOOLCHAIN" --profile minimal --no-self-update
-          rustup default "$FLOOR_TOOLCHAIN"
-          rustc --version
+          floor="$(sed -n 's/^rust-version *= *"\([^"]*\)".*/\1/p' Cargo.toml | head -n 1)"
+          if [ -z "$floor" ]; then
+            echo "no rust-version in the workspace manifest to read a floor from" >&2
+            exit 1
+          fi
+          echo "the manifest declares the floor as $floor"
+          rustup toolchain install "$floor" --profile minimal --no-self-update
+          echo "RUSTUP_TOOLCHAIN=$floor" >> "$GITHUB_ENV"
+          actual="$(RUSTUP_TOOLCHAIN="$floor" cargo --version | cut -d' ' -f2)"
+          if [ "$actual" != "$floor" ]; then
+            echo "this leg would have run on $actual, not on the declared floor $floor" >&2
+            exit 1
+          fi
+          echo "this leg runs on $actual"
       - name: Build the workspace on the declared floor
         run: cargo build --workspace --locked --all-targets
+
+  test-floor:
+    name: test (floor toolchain)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Select the declared floor, and refuse if it is not what runs
+        run: |
+          set -euo pipefail
+          floor="$(sed -n 's/^rust-version *= *"\([^"]*\)".*/\1/p' Cargo.toml | head -n 1)"
+          if [ -z "$floor" ]; then
+            echo "no rust-version in the workspace manifest to read a floor from" >&2
+            exit 1
+          fi
+          echo "the manifest declares the floor as $floor"
+          rustup toolchain install "$floor" --profile minimal --no-self-update
+          echo "RUSTUP_TOOLCHAIN=$floor" >> "$GITHUB_ENV"
+          actual="$(RUSTUP_TOOLCHAIN="$floor" cargo --version | cut -d' ' -f2)"
+          if [ "$actual" != "$floor" ]; then
+            echo "this leg would have run on $actual, not on the declared floor $floor" >&2
+            exit 1
+          fi
+          echo "this leg runs on $actual"
+      - name: Run the whole test suite on the declared floor
+        # A floor that is built but never tested is a floor on which the tests
+        # may not compile, and the tests are most of the code in this tree.
+        run: cargo test --workspace --locked
 
   test-windows:
     name: test (windows)
@@ -133,12 +181,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install the pinned toolchain
+      - name: Report the toolchain rust-toolchain.toml selected
         shell: bash
         run: |
           set -euo pipefail
-          rustup toolchain install "$PINNED_TOOLCHAIN" --profile minimal --no-self-update
-          rustup default "$PINNED_TOOLCHAIN"
+          rustup show active-toolchain
           rustc --version
       - name: Report the elevation state of this runner
         # Same purpose as the Linux leg. The query is read-only: it asks the

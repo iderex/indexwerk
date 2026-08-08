@@ -18,5 +18,11 @@ members = [
 [workspace.package]
 version = "0.0.0"
 edition = "2024"
+# The floor, and the only place it is written (#12). Edition 2024 does not
+# compile below this, so the value is forced rather than preferred, and the
+# reason it is not raised past the force is in CONTRIBUTING.md. cargo refuses a
+# compiler older than this key, and the floor leg of the gate reads the value
+# out of this file rather than carrying its own copy.
+rust-version = "1.85.0"
 repository = "https://github.com/iderex/indexwerk"
 publish = false

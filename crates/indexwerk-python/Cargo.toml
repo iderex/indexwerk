@@ -3,6 +3,7 @@ name = "indexwerk-python"
 description = "The Python package, built on the C interface with no privileged access to the core."
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 repository.workspace = true
 publish.workspace = true
 
