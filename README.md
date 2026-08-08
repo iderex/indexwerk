@@ -9,6 +9,7 @@ Schouten identity or the Garnir relations they are instances of belongs in
 
 Planning happens on the issue tracker first. Every decision that shapes
 the architecture is written down there with its reasons before the code
-that depends on it exists.
+that depends on it exists. Once argued, it lands as a decision record;
+the index of those is [docs/adr/README.md](docs/adr/README.md).
 
 See [NOTICE.md](NOTICE.md) for the intended-use notice.
