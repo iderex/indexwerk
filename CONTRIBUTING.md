@@ -190,7 +190,7 @@ The lint leg:
 
     cargo clippy --workspace --locked --all-targets -- -D warnings
 
-Denied rather than warned. A lint that only warns is a lint nobody fixes, and 
+Denied rather than warned. A lint that only warns is a lint nobody fixes, and
 `--all-targets` reaches the tests, which are most of the code here.
 
 ### Why the second format command is not a formatter
