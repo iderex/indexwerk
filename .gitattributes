@@ -38,12 +38,30 @@
 *.zip           binary
 
 # The conformance vectors of the normal form are the case this policy exists
-# for, and they are NOT declared here. A canonicalisation fixture whose bytes
-# are rewritten on checkout is a fixture that proves the wrong thing, and a
-# fixture that exists to carry a carriage return would be silently emptied by
-# the default above. Their format and their location are decided in the normal
-# form decision record, issue #6, which has not landed, so there is no path here
-# to declare and a pattern guessed now would be a claim about a decision that
-# has not been made. When #6 lands, whichever files have to be byte-exact are
-# added here as `-text` in the same change. Until then this policy does not
-# cover them, and that is a gap rather than an omission.
+# for. A canonicalisation fixture whose bytes are rewritten on checkout is a
+# fixture that proves the wrong thing, and one that exists to carry a carriage
+# return would be silently emptied by the default above.
+#
+# The normal form decision record, docs/adr/0004-normal-form-first.md, has since
+# landed and answers what they need. A vector is line-oriented UTF-8 text
+# carrying a case identifier, an input expression and its expected canonical
+# output. An index expression contains no carriage return and no trailing
+# whitespace that carries meaning, so nothing in a vector is byte-exact in the
+# sense this policy is about, and no exemption from it is owed. That paragraph
+# of the record is what this declaration implements; conformance/README.md
+# repeats the format next to the files a writer will open.
+#
+# So the directory is declared as text rather than left to the default. The
+# default would reach it anyway and the bytes would be identical, and the
+# declaration is here so that a reader of this file can tell a directory that
+# was considered from one nobody thought about.
+conformance/**  text eol=lf
+
+# The bound of the line above, because it is the thing that would go wrong
+# quietly. It declares everything under that directory as text, so a binary
+# vector format landing there later would be normalised and corrupted rather
+# than refused. The record fixes the format as text and gives its reason, that a
+# change to a vector has to be readable in a diff by somebody deciding whether
+# the normal form moved or a typo landed. Changing the format to something that
+# is not text means changing this file in the same change, and this sentence is
+# what the person doing it will meet.
