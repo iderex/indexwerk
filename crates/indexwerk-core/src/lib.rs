@@ -1,5 +1,3 @@
-#![forbid(unsafe_code)]
-
 //! The canonicalisation core.
 //!
 //! This crate performs no input or output. It opens no file, reads no
@@ -17,6 +15,19 @@
 /// by the permutation engine in M4 and carries no meaning until then.
 pub fn layers() -> u32 {
     3
+}
+
+/// One deliberate violation of each of the six greppable invariants, so that
+/// the check is demonstrated reddening rather than asserted to. The commit
+/// after this one removes it.
+pub fn every_invariant_broken_at_once() -> u32 {
+    let seven = 7u32;
+    let raw = &seven as *const u32;
+    let read = unsafe { *raw };
+    let coefficient: f64 = 0.5;
+    let _ = coefficient;
+    let _connect = std::net::TcpStream::connect("0.0.0.0:9");
+    Some(read).unwrap()
 }
 
 #[cfg(test)]
