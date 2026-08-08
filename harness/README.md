@@ -41,18 +41,28 @@ between a figure this project measured and a figure it quoted: where no licence
 is available the closed side stays labelled published, and the result says which
 side was measured here.
 
-## A result with no machine description is refused
+## A result that cannot be produced again is refused
 
-The rule this harness exists for is that a number means nothing without the
-machine it came from. That is enforced here rather than left to whoever reads
-the output.
+The rule this harness exists for is that a number means nothing on its own. What
+it has to carry with it is the command that produced it, the revision it was
+produced at, the machine it ran on, the versions of everything compared, how many
+times it ran and how far those runs spread. Those are the rules issue #31 fixes,
+and this is the half of them a machine can hold.
 
-`render` in `src/lib.rs` returns a refusal, and prints nothing, when the machine
-description is blank, when the list of versions compared is empty, or when the
-leg or the value is missing. There is no path through this crate that emits a
-number without all four. The refusals are exercised in `tests/refusal.rs`, one
-test per refusal, and each one is written so that removing the check it names
-turns that test red rather than leaving it passing on a technicality.
+`render` in `src/lib.rs` returns a refusal and prints nothing where any of them
+is missing. There is no second path and no flag that skips the checks. The set is
+the `Refused` enum in that file rather than a list here, because a list in a
+document drifts against the thing it describes.
+
+Two of those refusals are sharper than a blank check and are worth knowing about
+before a result is written. A revision has to look like an object name: `main`
+and `v0.1` are refused, because both move and the number does not move with them.
+And a single run is refused, because a spread cannot be taken across one sample,
+which is #31's sentence rather than a threshold chosen here.
+
+The refusals are exercised in `tests/refusal.rs`, one test per refusal. Each was
+proved by deleting the clause it names and watching that test, and only that
+test, turn red.
 
 Because no leg produces a result yet, the refusal is the whole of what this
 crate does today. That is the honest state and it is stated rather than dressed

@@ -3,8 +3,12 @@
 //! The hardware-bound harness (#18).
 //!
 //! What is here is not a measurement. It is the part that decides whether a
-//! measurement may be printed, and the answer is no unless the machine it came
-//! from and the versions it compared are both carried with it.
+//! measurement may be printed, and the answer is no unless everything a reader
+//! needs in order to produce the number again is carried with it: the command,
+//! the revision it was run at, the machine, the versions of everything
+//! compared, how many times it ran and how far the runs spread. Those are the
+//! rules #31 fixes, and refusing a result short of any of them is the half of
+//! that issue a machine can hold.
 //!
 //! The legs themselves are declared in `README.md` next to this file, one row
 //! per leg, saying what each one requires before it says what it measures.
@@ -41,6 +45,15 @@ pub struct Compared {
     pub version: String,
 }
 
+/// The smallest number of runs this crate will print a central value from.
+///
+/// One run is a sample and not a measurement, which is #31's sentence rather
+/// than a threshold chosen here.
+pub const FEWEST_REPETITIONS: u32 = 2;
+
+/// The shortest prefix of an object name accepted as a revision.
+pub const SHORTEST_REVISION: usize = 7;
+
 /// What a leg produced.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Measurement {
@@ -48,6 +61,20 @@ pub struct Measurement {
     pub leg: String,
     /// The number and its unit, as the leg wrote it.
     pub value: String,
+    /// The command a reader runs to produce this number again. Blank is
+    /// refused: a figure whose command is unrecorded cannot be re-run, and
+    /// re-running it is the only thing that settles a disagreement about it.
+    pub command: String,
+    /// The revision the number was produced at, as an object name. A branch or
+    /// a tag name is refused, because both move and the number does not move
+    /// with them.
+    pub revision: String,
+    /// How many times the leg ran. Below [`FEWEST_REPETITIONS`] is refused.
+    pub repetitions: u32,
+    /// The spread across those runs, as the leg wrote it, next to the central
+    /// value rather than instead of it. Blank is refused: a central value with
+    /// no spread hides whether the runs agreed.
+    pub spread: String,
     /// Everything the leg compared, each with its version. Empty is refused:
     /// a comparison whose versions are unrecorded cannot be repeated.
     pub compared: Vec<Compared>,
@@ -58,6 +85,13 @@ pub struct Measurement {
 pub enum Refused {
     NoLeg,
     NoValue,
+    NoCommand,
+    NoRevision,
+    /// A revision that is not an object name, which is what a branch or a tag
+    /// looks like from here.
+    RevisionThatMoves,
+    TooFewRepetitions,
+    NoSpread,
     NoMachineDescription,
     NothingCompared,
 }
@@ -67,6 +101,22 @@ impl Refused {
         match self {
             Refused::NoLeg => "the measurement names no leg",
             Refused::NoValue => "the measurement carries no value",
+            Refused::NoCommand => {
+                "no command is recorded, so the number cannot be produced again by anybody"
+            }
+            Refused::NoRevision => {
+                "no revision is recorded, so what was measured is unknown even with the command"
+            }
+            Refused::RevisionThatMoves => {
+                "the revision is not an object name. A branch or a tag moves and the number \
+                 does not move with it, so the pair stops being true without either changing"
+            }
+            Refused::TooFewRepetitions => {
+                "fewer runs than a spread can be taken across. A single run is not a measurement"
+            }
+            Refused::NoSpread => {
+                "no spread is recorded, so whether the runs agreed with each other is unknown"
+            }
             Refused::NoMachineDescription => {
                 "the machine description is blank, and a number with no machine is not a result"
             }
@@ -95,6 +145,22 @@ pub fn render(machine: &Machine, measurement: &Measurement) -> Result<String, Re
     if measurement.value.trim().is_empty() {
         return Err(Refused::NoValue);
     }
+    if measurement.command.trim().is_empty() {
+        return Err(Refused::NoCommand);
+    }
+    let revision = measurement.revision.trim();
+    if revision.is_empty() {
+        return Err(Refused::NoRevision);
+    }
+    if !is_an_object_name(revision) {
+        return Err(Refused::RevisionThatMoves);
+    }
+    if measurement.repetitions < FEWEST_REPETITIONS {
+        return Err(Refused::TooFewRepetitions);
+    }
+    if measurement.spread.trim().is_empty() {
+        return Err(Refused::NoSpread);
+    }
     if machine.description.trim().is_empty() {
         return Err(Refused::NoMachineDescription);
     }
@@ -105,6 +171,8 @@ pub fn render(machine: &Machine, measurement: &Measurement) -> Result<String, Re
     let mut out = String::new();
     out.push_str(&format!("leg: {}\n", measurement.leg.trim()));
     out.push_str(&format!("machine: {}\n", machine.description.trim()));
+    out.push_str(&format!("command: {}\n", measurement.command.trim()));
+    out.push_str(&format!("revision: {revision}\n"));
     out.push_str("compared:\n");
     for entry in &measurement.compared {
         out.push_str(&format!(
@@ -113,8 +181,23 @@ pub fn render(machine: &Machine, measurement: &Measurement) -> Result<String, Re
             entry.version.trim()
         ));
     }
+    out.push_str(&format!(
+        "runs: {}, spread {}\n",
+        measurement.repetitions,
+        measurement.spread.trim()
+    ));
     out.push_str(&format!("result: {}\n", measurement.value.trim()));
     Ok(out)
+}
+
+/// Whether a string looks like a git object name rather than a name that moves.
+///
+/// Hexadecimal and long enough to be one. This cannot tell an object name that
+/// exists from one that does not, and it is not meant to: what it separates is
+/// `main` and `v0.1` from a revision, which is the mistake somebody makes when
+/// the number is wanted quickly.
+pub fn is_an_object_name(revision: &str) -> bool {
+    revision.len() >= SHORTEST_REVISION && revision.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
 /// Whether the table in `README.md` declares this leg.
