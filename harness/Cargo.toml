@@ -12,13 +12,16 @@
 name = "indexwerk-harness"
 description = "Legs that need hardware or a licence, kept out of the gate. Ships to nobody."
 version = "0.0.0"
-# The two values below are copies of what `[workspace.package]` in the root
-# manifest holds, because a package outside that workspace cannot inherit from
-# it. A copy is a thing that drifts, so it is checked rather than trusted:
-# `crates/indexwerk-checks/tests/harness.rs` reads both manifests and reds if
-# either value here stops matching the root.
+# The values below are copies of what `[workspace.package]` in the root manifest
+# holds, because a package outside that workspace cannot inherit from it. A copy
+# is a thing that drifts, so each is checked rather than trusted:
+# `crates/indexwerk-checks/tests/harness.rs` reads both manifests and reds if the
+# edition or the floor here stops matching the root, and
+# `crates/indexwerk-checks/src/licence.rs` reads every manifest in the tree and
+# reds if any of them declares a different licence from the rest.
 edition = "2024"
 rust-version = "1.85.0"
+license = "AGPL-3.0-only"
 repository = "https://github.com/iderex/indexwerk"
 publish = false
 

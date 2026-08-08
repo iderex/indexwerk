@@ -6,6 +6,7 @@ edition.workspace = true
 rust-version.workspace = true
 repository.workspace = true
 publish.workspace = true
+license.workspace = true
 
 # No dependencies. Every entry added here is a supply chain entry that M8 has to
 # account for, so one is added only where an issue named it.

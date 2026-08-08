@@ -20,9 +20,14 @@
 //! workspace: it reads the declaration of the legs that deliberately do not run
 //! in the gate, so that the suite reports what it did not cover rather than
 //! leaving a green run to be read as covering everything.
+//!
+//! [`licence`] is a third kind again. It reads the manifests and the licence
+//! file, which are two places one fact is written, and refuses them disagreeing
+//! (#47).
 
 pub mod formatting;
 pub mod harness;
+pub mod licence;
 pub mod terms;
 
 use std::fmt;

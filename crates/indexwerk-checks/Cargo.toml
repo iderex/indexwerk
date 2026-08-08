@@ -6,6 +6,7 @@ edition.workspace = true
 rust-version.workspace = true
 repository.workspace = true
 publish.workspace = true
+license.workspace = true
 
 # No dependencies. The scan is a line-by-line literal search over the tree, and
 # a regular expression engine would be a supply chain entry bought for a feature
