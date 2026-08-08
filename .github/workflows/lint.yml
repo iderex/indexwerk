@@ -39,6 +39,12 @@ jobs:
         with:
           # No step pushes via git, so do not persist the GITHUB_TOKEN in .git/config.
           persist-credentials: false
+      - name: Install the component this leg needs
+        # rust-toolchain.toml carries no `components` key, on purpose: setting
+        # one would take rustfmt and clippy away from a contributor whose rustup
+        # installed them by default. So each leg installs what it needs, which
+        # is what the comment in that file says the gate does.
+        run: rustup component add rustfmt
       - name: Report the toolchain rust-toolchain.toml selected
         run: |
           set -euo pipefail
@@ -66,6 +72,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Install the component this leg needs
+        shell: bash
+        run: rustup component add rustfmt
       - name: Report the toolchain rust-toolchain.toml selected
         shell: bash
         run: |
@@ -94,6 +103,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Install the component this leg needs
+        run: rustup component add clippy
       - name: Report the toolchain rust-toolchain.toml selected
         run: |
           set -euo pipefail
