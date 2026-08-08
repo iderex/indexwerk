@@ -24,12 +24,16 @@ members = [
 # makes the ordinary suite report every leg in it as one that did not run.
 exclude = ["harness"]
 
-# No `license` or `license-file` key: the licence is an open decision on the
-# tracker (#2, entry 1) and the file it names does not exist yet (#47). A key
-# pointing at an absent file would be a claim this tree cannot back.
 [workspace.package]
 version = "0.0.0"
 edition = "2024"
+# The answer to entry 1 of #2, made on 2026-08-08, and the identifier the
+# members inherit. `LICENSE` at the root is the terms; this is the string a
+# package index, a bill of materials and a dependency policy read instead of
+# them, and the two saying different things is what
+# `crates/indexwerk-checks/src/licence.rs` refuses. The strict spelling rather
+# than the `-or-later` one is argued there.
+license = "AGPL-3.0-only"
 # The floor, and the only place it is written (#12). Edition 2024 does not
 # compile below this, so the value is forced rather than preferred, and the
 # reason it is not raised past the force is in CONTRIBUTING.md. cargo refuses a
