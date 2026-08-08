@@ -15,7 +15,13 @@
 //! What this cannot do is stated where the bound is: a line scan reads text and
 //! never a parse tree, so it judges spellings. A construct written in a
 //! spelling no term names walks through, and widening the terms is the repair.
+//!
+//! [`harness`] is the other kind of check here. It reads nothing in this
+//! workspace: it reads the declaration of the legs that deliberately do not run
+//! in the gate, so that the suite reports what it did not cover rather than
+//! leaving a green run to be read as covering everything.
 
+pub mod harness;
 pub mod terms;
 
 use std::fmt;

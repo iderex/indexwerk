@@ -1,3 +1,8 @@
 # Cargo's build directory. It is regenerated from the tracked sources and the
 # lockfile, so tracking it would put machine-specific artefacts in every diff.
 /target
+
+# The same, for the hardware-bound harness. It is its own workspace, so cargo
+# puts its build output beside its own manifest rather than in the directory
+# above.
+/harness/target

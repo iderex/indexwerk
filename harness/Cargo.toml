@@ -1,0 +1,29 @@
+# The hardware-bound harness (#18).
+#
+# Its own workspace, on purpose. `cargo test --workspace` at the repository root
+# cannot reach a package that is not a member, which is what keeps a leg needing
+# sixteen cores or a licence out of the default test command by construction
+# rather than by a convention about which tests to run. The root manifest
+# excludes this directory as well, so a reader of that file is told this
+# directory exists and was considered rather than left to find it.
+[workspace]
+
+[package]
+name = "indexwerk-harness"
+description = "Legs that need hardware or a licence, kept out of the gate. Ships to nobody."
+version = "0.0.0"
+# The two values below are copies of what `[workspace.package]` in the root
+# manifest holds, because a package outside that workspace cannot inherit from
+# it. A copy is a thing that drifts, so it is checked rather than trusted:
+# `crates/indexwerk-checks/tests/harness.rs` reads both manifests and reds if
+# either value here stops matching the root.
+edition = "2024"
+rust-version = "1.85.0"
+repository = "https://github.com/iderex/indexwerk"
+publish = false
+
+# No dependencies, for the same reason the checks crate has none. A benchmark
+# framework is the obvious thing to reach for here and it is not reached for
+# yet: there is nothing to benchmark, and a dependency bought before the thing
+# it serves exists is a supply chain entry with no argument behind it.
+[dependencies]

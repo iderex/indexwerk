@@ -12,6 +12,18 @@ members = [
     "crates/indexwerk-checks",
 ]
 
+# The hardware-bound harness of #18. It is a package in this tree and it is
+# deliberately not a member: `cargo test --workspace` cannot reach a package
+# that is not one, which is what keeps a leg needing sixteen cores, a processor
+# feature, a great deal of memory or an external licence out of the default test
+# command by construction rather than by a convention about which tests to run.
+#
+# It is named here rather than left out, so that a reader of this file is told
+# the directory exists and was considered. What each leg requires is the table
+# in `harness/README.md`, and `crates/indexwerk-checks` reads that table and
+# makes the ordinary suite report every leg in it as one that did not run.
+exclude = ["harness"]
+
 # No `license` or `license-file` key: the licence is an open decision on the
 # tracker (#2, entry 1) and the file it names does not exist yet (#47). A key
 # pointing at an absent file would be a claim this tree cannot back.
