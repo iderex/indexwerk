@@ -30,11 +30,20 @@ tree, and it is not made by the change that adds this file.
 | `build` | `.github/workflows/build.yml` |
 | `test` | `.github/workflows/build.yml` |
 | `build (floor toolchain)` | `.github/workflows/build.yml` |
+| `test (floor toolchain)` | `.github/workflows/build.yml` |
 | `test (windows)` | `.github/workflows/build.yml` |
 | `DCO sign-off` | `.github/workflows/dco.yml` |
 | `Reject Trojan Source Unicode` | `.github/workflows/unicode-guard.yml` |
 | `dependency-review` | `.github/workflows/dependency-review.yml` |
 | `Audit workflows (zizmor)` | `.github/workflows/zizmor.yml` |
+
+The two floor names say which compiler they ran on rather than only that they
+ran, because a reader of this list has to be able to tell the leg that exercises
+the minimum supported version from the leg that exercises the pinned one. Which
+version each is comes from the tree rather than from the workflow: the pinned
+one is `rust-toolchain.toml` and the floor is `rust-version` in the workspace
+manifest, and the floor legs read the manifest and refuse to run if the compiler
+they got is not the one it declares.
 
 Two of those names are not chosen freely. `dependency-review` is the job id,
 used because that workflow declares no job `name:` and the check run then takes

@@ -3,6 +3,7 @@ name = "indexwerk-ffi"
 description = "The C interface, and the only crate in this workspace allowed unsafe code."
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 repository.workspace = true
 publish.workspace = true
 

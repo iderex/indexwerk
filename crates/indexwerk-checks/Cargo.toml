@@ -3,6 +3,7 @@ name = "indexwerk-checks"
 description = "Checks over this tree that the compiler cannot make. Ships to nobody."
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 repository.workspace = true
 publish.workspace = true
 

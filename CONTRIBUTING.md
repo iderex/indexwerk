@@ -48,6 +48,75 @@ has to contain the constructs and a proof that it bites has to feed them in:
 text back to the scanner under a different name to show the exclusion is load
 bearing rather than decorative.
 
+## The toolchain, and the two floors
+
+### The compiler you build with
+
+`rust-toolchain.toml` pins it. rustup reads that file before its own default and
+installs what it names on first use, so a clone builds with the same compiler
+the gate builds with and nobody has to be told which one that is.
+
+It is the only place the pinned version is written. Moving it is a one-line
+change to that file.
+
+### The oldest compiler this project supports
+
+`rust-version` in the workspace manifest, and it is `1.85.0`.
+
+That value is forced rather than preferred. The workspace is on edition 2024,
+which no compiler below 1.85 accepts, so the floor cannot go lower while the
+edition stands.
+
+It is also not raised above the force, and that is the part worth stating,
+because raising it is the easy direction. Every distribution that packages this
+project ships whatever compiler its release carries, and a floor moved to pick
+up a convenience feature locks those packagers out for as long as their release
+lives. A language feature from the last three years is not worth that, and where
+one genuinely is, the argument belongs in an issue rather than in a commit that
+happens to need it.
+
+Two gate legs exercise the floor, `build (floor toolchain)` and
+`test (floor toolchain)`. Both read the value out of the workspace manifest, so
+the floor that is declared and the floor that is exercised cannot drift apart.
+Both also refuse to run if the compiler they ended up with is not the one the
+manifest declares, which is not paranoia: `rust-toolchain.toml` outranks
+`rustup default`, so a floor leg written the obvious way builds on the pinned
+compiler and reports itself green as the floor.
+
+Building on the floor locally:
+
+    rustup toolchain install 1.85.0 --profile minimal
+    RUSTUP_TOOLCHAIN=1.85.0 cargo test --workspace --locked
+
+### The oldest Python the package supports
+
+Python 3.10, and the wheels target the stable application binary interface at
+that level, `abi3-py310`.
+
+3.10 is the oldest version still receiving security fixes. 3.9 reached end of
+life on 2025-10-31 and 3.10 does so in October 2026, dates published in the
+Python developer guide's version table and quoted from it rather than measured
+here. Supporting a version upstream has stopped fixing means shipping wheels for
+an interpreter nobody should be running.
+
+The stable-interface level is fixed here rather than in M7 because it is the
+same number: a single wheel built against `abi3-py310` loads on 3.10 and every
+version after it, so the floor and the interface level move together or the
+wheel matrix stops making sense.
+
+Neither number is declared in Python package metadata, because there is no
+Python package metadata in this tree. `crates/indexwerk-python` is a Rust crate
+with no `pyproject.toml`, no build backend and no binding code, and writing one
+that cannot build a wheel would be a claim this tree cannot back. That half of
+#12 is owed and is named there.
+
+### Raising either floor
+
+Raising the Rust floor or the Python floor needs an issue, argued and merged
+like anything else. A floor is a promise to somebody who is not in the room when
+the change is made, and the cost of breaking it lands on them rather than here.
+Lowering one needs an issue for the same reason.
+
 ## Signing off your work
 
 Every commit carries a `Signed-off-by:` trailer matching its author. Sign
