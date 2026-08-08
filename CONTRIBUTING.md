@@ -26,7 +26,7 @@ leaving the host, issue #10, and it is stated here as well because the test
 suite is where it would first be violated.
 
 Where a test genuinely needs one of these, it goes into the hardware-bound
-harness described in issue #18 and never into the default suite.
+harness in `harness/` and never into the default suite.
 
 ### How the rule is checked
 
@@ -47,6 +47,52 @@ has to contain the constructs and a proof that it bites has to feed them in:
 `bites.rs` rather than left to drift, and a test there feeds that file's own
 text back to the scanner under a different name to show the exclusion is load
 bearing rather than decorative.
+
+The scan reads `crates/`, `docs/` and `README.md`, and none of those reaches
+`harness/`, so nothing scans the harness for the constructs above. The legs
+there are allowed to want cores, a processor feature, memory and a licence.
+They are still not allowed to want elevation, and today that is a sentence
+rather than a check.
+
+## The hardware-bound harness
+
+Some things worth measuring cannot be measured on a shared runner without the
+number becoming either flaky or dishonest: how the work scales with core count,
+a path selected by a processor feature the runner lacks, a case that needs more
+memory than the runner has, and any comparison against a product that needs a
+licence. Those legs live in `harness/`, which is a package in this tree and
+deliberately not a member of the workspace.
+
+That is what keeps them out of the default test command. `cargo test
+--workspace` cannot reach a package the workspace excludes, so the separation
+holds whether or not anybody remembers it:
+
+    cargo metadata --format-version 1 --no-deps
+
+`harness/README.md` is the list. One row per leg, saying what the leg requires
+before it says what it measures, and the requirement kind is one of the four the
+harness is for rather than free prose. That table is parsed by
+`crates/indexwerk-checks`, so a row with an invented requirement kind, an empty
+requirement, a duplicate identifier or a command belonging to something other
+than the harness reds the ordinary suite.
+
+The ordinary suite also prints every leg in that table as one that did not run,
+with what running it would require, so a green run cannot be read as covering
+them.
+
+Running the harness, and its own suite, from a clone:
+
+    cargo run --manifest-path harness/Cargo.toml -- list
+    cargo test --manifest-path harness/Cargo.toml --all-targets
+
+Neither is run by the gate. That has a cost worth knowing about: a change to the
+workspace that stops the harness compiling is not caught until somebody builds
+it, and the second command above is what catches it.
+
+A result the harness prints carries the machine it came from and the version of
+everything it compared. That is enforced in `harness/src/lib.rs` rather than
+left to whoever reads the output, and a measurement missing either is refused
+and nothing is printed.
 
 ## The toolchain, and the two floors
 
