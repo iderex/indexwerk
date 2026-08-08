@@ -117,7 +117,7 @@ pub fn check_text(relative_path: &str, text: &str) -> Vec<Complaint> {
             continue;
         }
         let trailing = &line[line.trim_end().len()..];
-        if !trailing.is_empty() && trailing != HARD_BREAK {
+        if trailing.len() > 0 && trailing != HARD_BREAK {
             found.push(complain(number, Defect::TrailingWhitespace));
         }
     }
