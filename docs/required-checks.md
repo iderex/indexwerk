@@ -36,6 +36,14 @@ tree, and it is not made by the change that adds this file.
 | `Reject Trojan Source Unicode` | `.github/workflows/unicode-guard.yml` |
 | `dependency-review` | `.github/workflows/dependency-review.yml` |
 | `Audit workflows (zizmor)` | `.github/workflows/zizmor.yml` |
+| `invariants` | `.github/workflows/invariants.yml` |
+
+`invariants` runs a suite the `test` leg already runs, and the duplication is
+the point rather than an oversight. #41 asks for one check name that carries
+every greppable invariant, and a name that also carried the rest of the
+workspace would report a broken invariant and a failing unit test as the same
+red. What that leg enforces is listed in `docs/invariants.md`, which is
+rendered by the check rather than written beside it.
 
 The two floor names say which compiler they ran on rather than only that they
 ran, because a reader of this list has to be able to tell the leg that exercises

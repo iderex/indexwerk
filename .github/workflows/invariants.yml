@@ -1,0 +1,65 @@
+# The greppable invariants, under one check name (#41).
+#
+# One check run, named exactly `invariants`. A required check is matched by its
+# literal name, so a job renamed here silently stops being required and nothing
+# reports that it happened. If this name changes, `docs/required-checks.md`
+# changes in the same pull request.
+#
+# The invariants themselves are not listed here and not listed in any document
+# that a person maintains by hand. They are the table in
+# `crates/indexwerk-checks/src/terms.rs`, and `docs/invariants.md` is rendered
+# from that table by the check itself, so a document that drifts against the
+# check reds this leg.
+#
+# The suite this runs is also run by the `test` leg of `build.yml`, which runs
+# the whole workspace. That is deliberate rather than duplicated by accident:
+# #41 asks for one check name that carries every invariant, and a name that
+# also carries the rest of the workspace would report a broken invariant and a
+# failing unit test as the same red. This leg fails only for an invariant.
+#
+# No version is written here. `rust-toolchain.toml` is what rustup reads, for
+# the reason #12 gives.
+name: Invariants
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Read-only. This job reads the tree and writes nothing.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  invariants:
+    name: invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # No step pushes via git, so do not persist the GITHUB_TOKEN in .git/config.
+          persist-credentials: false
+      - name: Report the toolchain rust-toolchain.toml selected
+        run: |
+          set -euo pipefail
+          rustup show active-toolchain
+          rustc --version
+      - name: Report which invariants this run holds
+        # The run says what it examined. A leg that printed only a verdict could
+        # not be told apart from one that examined nothing, and the list is
+        # rendered from the check rather than restated, so what is printed here
+        # is what was enforced.
+        run: cat docs/invariants.md
+      - name: Enforce every greppable invariant over this tree
+        # --locked refuses to update Cargo.lock, so this leg cannot pass by
+        # resolving something different from what the tree declares.
+        run: cargo test --locked -p indexwerk-checks
