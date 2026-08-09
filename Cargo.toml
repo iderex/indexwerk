@@ -31,9 +31,9 @@ edition = "2024"
 # members inherit. `LICENSE` at the root is the terms; this is the string a
 # package index, a bill of materials and a dependency policy read instead of
 # them, and the two saying different things is what
-# `crates/indexwerk-checks/src/licence.rs` refuses. The strict spelling rather
-# than the `-or-later` one is argued there.
-license = "AGPL-3.0-only"
+# `crates/indexwerk-checks/src/licence.rs` refuses. Which of the two spellings
+# of that licence is the grant was answered on 2026-08-09 and is argued there.
+license = "AGPL-3.0-or-later"
 # The floor, and the only place it is written (#12). Edition 2024 does not
 # compile below this, so the value is forced rather than preferred, and the
 # reason it is not raised past the force is in CONTRIBUTING.md. cargo refuses a

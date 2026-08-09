@@ -16,5 +16,5 @@ See [NOTICE.md](NOTICE.md) for the intended-use notice.
 
 ## License
 
-This repository is under the GNU Affero General Public License version 3, copyright 2026 Nils Lehnen.
+This repository is under the GNU Affero General Public License version 3 or, at your option, any later version, copyright 2026 Nils Lehnen.
 See [LICENSE](LICENSE) for the terms.
