@@ -2,6 +2,11 @@
 
 The standard for tensor computer algebra is xAct, free software that requires a proprietary closed-source product. The distance is a factor of nine, 270 ms against 2400 ms for the Einstein tensor of the FLRW metric, figures published by the author of that port and quoted here rather than measured by this project, and the Mathematica side parallelises across kernels where Python is held by the global interpreter lock. The bottleneck is one sharply defined problem, canonicalisation of index expressions under permutation symmetry groups, which is pure combinatorics on groups and flies on sixteen cores in a compiled language. Cadabra already exists as a good standalone open solution, so the gap is not the core alone but the application layer above it: xPert, xPand, Invar and Harmonics have no open counterpart, and those are the packages perturbation theory needs.
 
+Every performance figure in this repository, the ones above included, follows
+[docs/benchmarks.md](docs/benchmarks.md): what a number has to carry before it
+may be written down, and the difference between a figure this project measured
+and one it quoted from somebody else.
+
 The first core canonicalises single-term symmetries only, so an expression that
 needs a multi-term identity such as the first or second Bianchi identity, the
 Schouten identity or the Garnir relations they are instances of belongs in
