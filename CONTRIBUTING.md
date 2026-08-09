@@ -62,6 +62,41 @@ documentation rule is a different case: `harness/README.md` is neither
 `README.md` nor under `docs/`, so a performance number written there is read by
 nothing, and that gap is real rather than covered.
 
+### What the runners show, and what they do not
+
+The check above is the enforcing half, and it runs on every platform the gate
+runs on. The other half is a demonstration that the suite really does run under
+these conditions, and it is not the same on the two platforms.
+
+On Linux it is shown. The `test` leg prints the display variables and the
+account it runs under before it runs the suite, and that leg is green with no
+display and without root.
+
+On Windows it is not shown. The hosted runner executes every job as an
+administrator with an elevated token, there is no unelevated account on it to
+run the suite under, and creating one would need the administrator rights this
+rule exists to keep out of the suite. So the Windows leg prints the account and
+whether the token is elevated, and that value is recorded rather than required:
+
+    user=<account>
+    elevated=<True|False>
+
+A green Windows run on an elevated token is evidence that the suite works. It is
+not evidence that the suite works without administrator rights, and it is not
+read as if it were. If that line ever prints `False`, the demonstration is in
+the log and nobody has to reopen the question.
+
+This is narrower than the condition issue #17 was opened with, which asked for
+the suite to be demonstrated on Windows under a non-administrator account. The
+narrowing was decided on 2026-08-09, it is recorded in that issue, and it gives
+something up: nothing here shows the suite running under an unelevated token on
+Windows, and the only route to that evidence is a runner under a standard
+account that somebody owns and keeps patched. The refusal of the constructs is
+unchanged on both platforms and is what prevents a regression.
+
+Neither reporting step is asserted by a check. Deleting one would leave both
+legs green and this section describing output the gate no longer produces.
+
 ## The hardware-bound harness
 
 Some things worth measuring cannot be measured on a shared runner without the
