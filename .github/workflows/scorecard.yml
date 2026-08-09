@@ -87,7 +87,9 @@ jobs:
           path: results.sarif
           retention-days: 5
 
-      # Surface the findings in the code-scanning tab, alongside CodeQL and zizmor.
+      # Surface the findings in the code-scanning tab, alongside zizmor's. No code
+      # analysis engine runs in this repository; docs/required-checks.md says which
+      # analysis reads which part of the tree and which three are absent.
       - name: Upload to code-scanning
         uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
         with:

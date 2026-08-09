@@ -121,6 +121,90 @@ Nothing is in this state today. `format` and `lint` were, until
 | --- | --- | --- |
 | `Scorecard analysis` | `.github/workflows/scorecard.yml` | It declares no `pull_request` trigger. Its Branch-Protection check reads the default branch's ruleset and its results can only be published from the default branch, so a pull-request run would score the wrong thing and could not publish. It runs on push to `main`, on a schedule, and on a ruleset change. |
 
+## What reads each part of the tree, and what reads none of it
+
+The tables above say which names must be green. They do not say what those
+names read, and a reader who has only them can take a green gate for a tree
+that has been analysed. This section is the other half, and it is the condition
+of #39 that asks the check list to carry it: for each part of the tree, the
+analysis that covers it and the analysis that does not.
+
+| Part of the tree | What reads it | What does not |
+| --- | --- | --- |
+| The four workspace members under `crates/` | the compiler with warnings denied, on `build`, `test` and both floor legs; clippy with warnings denied, on `lint`; rustfmt, on `format` and `format (windows)`; the greppable invariants, on `invariants`; the Unicode guard | no memory checker, no sanitiser and no code analysis engine |
+| `harness/` | the greppable invariants, for the headless and unelevated rule and for no other; the Unicode guard; its Markdown, through the whitespace check inside the two `format` legs | the compiler, clippy and rustfmt, because the root manifest excludes the directory from the workspace; its own suite, which no leg runs |
+| Every tracked Markdown file, this one included | the whitespace check inside the two `format` legs; the Unicode guard; the performance-number invariant, over `README.md` and `docs/` and nothing else | any judgement of what the prose says; the whitespace check is not a Markdown formatter and CONTRIBUTING.md says what it declines to judge |
+| `.github/workflows/` | zizmor, on `Audit workflows (zizmor)`; the Unicode guard | no code analysis engine; the leg the target gate of #37 runs over its own action definitions has no counterpart here |
+| Python | nothing, because there is no Python source here | the `format` legs red on a `.py` or `.pyi` file arriving with no formatter chosen for it, which holds the absence rather than analysing anything |
+
+### The boundary at `harness/`, produced rather than reasoned about
+
+That directory is the part most likely to be assumed covered, because it is
+Rust in this repository and the legs that read Rust name no directory. They
+name the workspace, and the root manifest excludes this one:
+
+    cargo metadata --format-version 1 --no-deps
+
+Being excluded and being unread are different statements, so the row above was
+measured. With one badly formatted function using `clone` on a `u32` appended
+to `harness/src/lib.rs`, both legs pass:
+
+    cargo fmt --all -- --check
+    exit 0
+    cargo clippy --workspace --locked --all-targets -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s)
+    exit 0
+
+and both refuse the same bytes once that manifest is named:
+
+    cargo fmt --manifest-path harness/Cargo.toml --all -- --check
+    Diff in harness/src/lib.rs:255:
+    exit 1
+    cargo clippy --manifest-path harness/Cargo.toml --locked --all-targets -- -D warnings
+    error: using `clone` on type `u32` which implements the `Copy` trait
+    exit 101
+
+The function was removed again. Neither command in the second pair is run by
+any leg. `harness/README.md` and CONTRIBUTING.md say the same thing from the
+other side, as the cost of keeping a hardware-bound leg out of the default test
+command, and this is the row a reader of the check list needs in order to see
+it.
+
+### The three analyses that are absent
+
+No memory checker, no sanitiser leg and no code analysis engine runs here. What
+runs is the whole workflow set, read at `dd6b071`:
+
+    git ls-tree -r --name-only dd6b071 -- .github/workflows/
+    .github/workflows/build.yml
+    .github/workflows/dco.yml
+    .github/workflows/dependency-review.yml
+    .github/workflows/invariants.yml
+    .github/workflows/lint.yml
+    .github/workflows/scorecard.yml
+    .github/workflows/unicode-guard.yml
+    .github/workflows/zizmor.yml
+
+An engine is named twice in that set and neither is a run of one. Both are the
+action that uploads a SARIF file to code scanning, used by the scorecard
+workflow and by zizmor to publish findings they produced themselves:
+
+    git grep -ln 'codeql-action/upload-sarif' dd6b071 -- .github/workflows/
+    dd6b071:.github/workflows/scorecard.yml
+    dd6b071:.github/workflows/zizmor.yml
+
+A comment beside one of them read that the findings appear alongside CodeQL,
+which does not run in this repository. It is corrected in the same change as
+this section, because a workflow comment naming an engine is exactly the
+reading this section exists to prevent.
+
+### What moves this section
+
+Each of the three absent analyses is owed by #39, along with the judgement of
+whether an engine's support for this language is worth triaging. A pass that
+lands adds its name to the required table and moves its row here in the same
+change, which is what the section below already says about names.
+
 ## Growing this list
 
 M8 is where the quality parity programme adds the rest, in #37. An element that
