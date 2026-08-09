@@ -30,7 +30,14 @@
 //! also reads the lock file, which is where one crate at two incompatible
 //! versions shows up and where no manifest asked for it.
 
+//! [`egress_dependencies`] reads the lock file that module walks and asks a
+//! different question of it: whether anything in the whole transitive set
+//! carries a route off this host. That is the half of the offline guarantee the
+//! source scan cannot reach, because the risk is not a socket call written here
+//! (#36).
+
 pub mod dependencies;
+pub mod egress_dependencies;
 pub mod formatting;
 pub mod harness;
 pub mod licence;
