@@ -57,8 +57,9 @@ the tree. The workspace licence is `AGPL-3.0-or-later`, answered on 2026-08-09
 in [#2](https://github.com/iderex/indexwerk/issues/2), so the allowed list a
 licence check needs can now be written; nothing here writes it.
 
-The transitive walk itself is shared with
-[#36](https://github.com/iderex/indexwerk/issues/36), which needs the same walk
-to refuse a dependency arriving with a network stack attached. Whichever lands
-first should land it in a shape the others read, or the allow lists end up
-disagreeing about what is in the tree.
+What a crate brings with it is covered, and it is a separate question from why it
+is here. `crates/indexwerk-checks/src/egress_dependencies.rs` reads the same lock
+file and refuses anything in the whole transitive set that carries a route off
+this host, which is [#36](https://github.com/iderex/indexwerk/issues/36). A row
+in this register does not admit such a crate, and no row can: that check has an
+allow list of its own, it is empty, and adding to it needs an issue.
