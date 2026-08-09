@@ -9,19 +9,48 @@ name and this file is one change.
 The list also says what is deliberately not required and why, so that an absence
 can be told from an oversight.
 
-## What enforces this list today, which is nothing
+## What enforces this list, and what does not
 
-This file is the list. It is not the enforcement. The ruleset on `main` carries
-no required status check, read from the ruleset rather than from anyone's
-memory:
+The ruleset on `main` requires the names in the table below, read from the
+ruleset rather than from anyone's memory:
 
-    gh api repos/iderex/indexwerk/rulesets/20527780 --jq '{name: .name, rules: [.rules[].type]}'
-    {"name":"gate","rules":["deletion","non_fast_forward","pull_request"]}
+    gh api repos/iderex/indexwerk/rulesets/20527780 --jq '[.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context] | sort | .[]'
+    Audit workflows (zizmor)
+    DCO sign-off
+    Reject Trojan Source Unicode
+    build
+    build (floor toolchain)
+    dependency-review
+    format
+    format (windows)
+    invariants
+    lint
+    test
+    test (floor toolchain)
+    test (windows)
 
-So a red check below blocks nothing on its own, and a merge is refused only for
-a direct push, a force push, or the absence of a pull request. Making the
-ruleset require these names is a repository setting rather than a change to this
-tree, and it is not made by the change that adds this file.
+That those are the rows of the table and not a set beside it is derived rather
+than compared by eye. The claim is the empty output:
+
+    diff <(gh api repos/iderex/indexwerk/rulesets/20527780 --jq '[.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context] | sort | .[]') <(sed -n '/^## Required/,/^## Runs but/p' docs/required-checks.md | sed -n 's/^| `\([^`]*\)`.*/\1/p' | LC_ALL=C sort)
+
+The rest of the ruleset is what it was, so a merge is refused for a direct push,
+a force push and the absence of a pull request as well as for a red name above:
+
+    gh api repos/iderex/indexwerk/rulesets/20527780 --jq '[.rules[].type] | sort | join(", ")'
+    deletion, non_fast_forward, pull_request, required_status_checks
+
+This section replaces one that read an empty required set and concluded that a
+red check blocked nothing on its own. What that section was right about has not
+moved: the ruleset is a repository setting, no file in this tree holds it, and
+changing what it requires is not a change to this tree.
+
+That is also why the agreement between the two is the part nothing enforces.
+Reading a ruleset needs the network, and no test here may have one, which is a
+birth requirement rather than a gap waiting to be closed. So both directions of
+drift pass every check: a name the ruleset requires and this table does not
+carry, and a row here the ruleset never carried. The commands above are the
+whole comparison, and running them is a person's job.
 
 ## Required
 

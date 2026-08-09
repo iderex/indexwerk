@@ -152,10 +152,11 @@ it.
 
 ## What this file does not settle
 
-Nothing here makes a check required. The ruleset on this board carries no
-required status check at all, which `docs/required-checks.md` says of itself in
-its own opening section, and changing that is a repository setting rather than a
-change to this tree.
+Nothing here makes a check required. What the ruleset on this board requires is
+read from the ruleset and recorded in `docs/required-checks.md`, in its own
+opening section, and changing it is a repository setting rather than a change to
+this tree. No check name of this board appears here, so this file is not a
+second copy of that list to go stale when the ruleset moves.
 
 The third condition of #37, that the required check list has grown to include
 everything this programme marks as required, is not met by this file and cannot
