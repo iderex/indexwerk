@@ -24,7 +24,13 @@
 //! [`licence`] is a third kind again. It reads the manifests and the licence
 //! file, which are two places one fact is written, and refuses them disagreeing
 //! (#47).
+//!
+//! [`dependencies`] reads the same manifests for what they depend on, and holds
+//! the register of reasons closed against them in both directions (#38). It
+//! also reads the lock file, which is where one crate at two incompatible
+//! versions shows up and where no manifest asked for it.
 
+pub mod dependencies;
 pub mod formatting;
 pub mod harness;
 pub mod licence;
