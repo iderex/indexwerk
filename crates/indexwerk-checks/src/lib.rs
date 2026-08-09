@@ -315,26 +315,48 @@ pub fn workspace_root() -> PathBuf {
         .to_path_buf()
 }
 
-/// Scan the whole tree: every Rust source under `crates/`, every markdown file
-/// the documentation scope covers, and the crate roots that must carry the
-/// compile-time refusal of unsafe code.
-pub fn scan_workspace() -> Vec<Finding> {
-    let root = workspace_root();
-    let mut findings = Vec::new();
+/// Every file the scan opens, relative to the workspace root, sorted, with the
+/// exclusions of [`terms::EXCLUDED`] already applied.
+///
+/// Split out and public so that where the walk arrives is a fact a test can
+/// read rather than a fact inferred from the walk finding nothing. Removing a
+/// directory from [`files_read`] silences every invariant over it without
+/// changing a scope, a term or a document, and that is the failure this is
+/// separated for.
+pub fn files_the_scan_reads() -> Vec<String> {
+    files_read(&workspace_root())
+        .into_iter()
+        .map(|(relative, _)| relative)
+        .collect()
+}
 
+/// The tree the scan reads: every Rust source under `crates/` and under
+/// `harness/`, and every markdown file the documentation scope covers.
+///
+/// `harness/` is walked although it is outside the workspace. `cargo test
+/// --workspace` cannot reach the package, which is what keeps its
+/// hardware-bound legs out of the gate, and this walk is not that command.
+fn files_read(root: &Path) -> Vec<(String, PathBuf)> {
     let mut files = Vec::new();
-    collect_files(&root.join("crates"), &root, "rs", &mut files);
-    collect_files(&root.join("docs"), &root, "md", &mut files);
+    collect_files(&root.join("crates"), root, "rs", &mut files);
+    collect_files(&root.join("harness"), root, "rs", &mut files);
+    collect_files(&root.join("docs"), root, "md", &mut files);
     let readme = root.join("README.md");
     if readme.is_file() {
         files.push(("README.md".to_owned(), readme));
     }
+    files.retain(|(relative, _)| !EXCLUDED.contains(&relative.as_str()));
     files.sort();
+    files
+}
 
-    for (relative, absolute) in files {
-        if EXCLUDED.contains(&relative.as_str()) {
-            continue;
-        }
+/// Scan the whole tree, and the crate roots that must carry the compile-time
+/// refusal of unsafe code. What is read is [`files_read`].
+pub fn scan_workspace() -> Vec<Finding> {
+    let root = workspace_root();
+    let mut findings = Vec::new();
+
+    for (relative, absolute) in files_read(&root) {
         let text = match fs::read_to_string(&absolute) {
             Ok(text) => text,
             // A file that cannot be read is not a file that was found clean.

@@ -18,6 +18,7 @@ const CORE: &str = "crates/indexwerk-core/src/lib.rs";
 const FFI: &str = "crates/indexwerk-ffi/src/lib.rs";
 const PYTHON: &str = "crates/indexwerk-python/src/lib.rs";
 const CHECKS: &str = "crates/indexwerk-checks/src/walk.rs";
+const HARNESS: &str = "harness/tests/refusal.rs";
 const DOC: &str = "docs/benchmarks.md";
 
 fn classes(path: &str, sample: &str) -> Vec<Class> {
@@ -209,6 +210,56 @@ fn service_installation_is_refused() {
 fn elevation_is_refused() {
     let sample = "    run(\"powershell Start-Process -Verb RunAs\")?;";
     assert_eq!(classes(CHECKS, sample), vec![Class::Elevation]);
+}
+
+#[test]
+fn elevation_in_the_harness_is_refused_too() {
+    // The near-miss worth spending on. A leg that wants hardware belongs in
+    // `harness/`, which is the one directory in this tree allowed to want
+    // something the gate cannot give it. Elevation is not on that list, and a
+    // test moved there to get around a red check is the move this leg refuses.
+    let sample = "    run(\"powershell Start-Process -Verb RunAs\")?;";
+    assert_eq!(classes(HARNESS, sample), vec![Class::Elevation]);
+}
+
+#[test]
+fn a_bind_off_loopback_in_the_harness_is_refused_too() {
+    let sample = "let listener = TcpListener::bind(\"0.0.0.0:8080\")?;";
+    assert!(classes(HARNESS, sample).contains(&Class::OffLoopbackBind));
+}
+
+#[test]
+fn a_service_install_in_the_harness_is_refused_too() {
+    let sample = "    run(\"schtasks /create /tn indexwerk\")?;";
+    assert_eq!(classes(HARNESS, sample), vec![Class::ServiceInstall]);
+}
+
+#[test]
+fn a_certificate_store_in_the_harness_is_refused_too() {
+    let sample = "    let store = X509Store::open()?;";
+    assert_eq!(classes(HARNESS, sample), vec![Class::CertificateStore]);
+}
+
+#[test]
+fn a_bind_to_loopback_in_the_harness_is_not_refused() {
+    let sample = "let listener = Listener::bind(\"127.0.0.1:0\")?;";
+    assert!(scan_text(HARNESS, sample).is_empty());
+}
+
+#[test]
+fn the_other_invariants_stop_at_the_crates_and_do_not_read_the_harness() {
+    // The half that would otherwise rot. Widening one invariant to a directory
+    // must not widen the other five, and the harness is deliberately outside
+    // them: it is not a shipped crate, it is not the core, and nothing in it
+    // reaches a consumer. A fixture that breaks four of them at once is silent
+    // under this path and refused under a crate path.
+    let sample = "use std::net::TcpListener;\nlet x: f64 = unsafe { table.get(0).unwrap() };\n";
+    assert!(scan_text(HARNESS, sample).is_empty(), "{sample}");
+    let under_a_crate = invariants(CORE, sample);
+    assert!(under_a_crate.contains(&Invariant::NoEgressFromAShippedCrate));
+    assert!(under_a_crate.contains(&Invariant::NoFloatingPointInTheCore));
+    assert!(under_a_crate.contains(&Invariant::NoUnsafeOutsideTheDeclaredCrate));
+    assert!(under_a_crate.contains(&Invariant::NoPanicPathInALibraryCrate));
 }
 
 // No performance number without its source.

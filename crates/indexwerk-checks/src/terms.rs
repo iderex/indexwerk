@@ -87,7 +87,7 @@ impl Invariant {
             Invariant::NoFloatingPointInTheCore => Scope::TheCoreCrate,
             Invariant::NoEgressFromAShippedCrate => Scope::TheShippedCrates,
             Invariant::NoPanicPathInALibraryCrate => Scope::LibrarySourcesOutsideTests,
-            Invariant::HeadlessAndUnelevated => Scope::EveryRustSourceUnderCrates,
+            Invariant::HeadlessAndUnelevated => Scope::EveryRustSourceUnderCratesAndTheHarness,
             Invariant::NoPerformanceNumberWithoutItsSource => Scope::TrackedDocumentation,
         }
     }
@@ -101,8 +101,16 @@ impl Invariant {
 /// [`Scope::covers`], and that function is what the scope tests exercise.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Scope {
-    /// Every `.rs` file under `crates/`, shipped or not.
-    EveryRustSourceUnderCrates,
+    /// Every `.rs` file under `crates/`, shipped or not, and every `.rs` file
+    /// under `harness/`.
+    ///
+    /// The harness is a package outside the workspace, so `cargo test
+    /// --workspace` cannot reach its suite. That separation is what keeps a
+    /// hardware-bound leg out of the gate, and it is not a reason to stop
+    /// reading the directory: the legs there are allowed to want cores, a
+    /// processor feature, memory and a licence, and they are not allowed to
+    /// want elevation. This scan is not the workspace, so it reads both.
+    EveryRustSourceUnderCratesAndTheHarness,
     /// Every `.rs` file under `crates/` except those of the crate that is the
     /// declared exception to `#![forbid(unsafe_code)]`.
     CratesOtherThanTheForeignInterface,
@@ -122,7 +130,9 @@ pub enum Scope {
 impl Scope {
     pub fn description(self) -> &'static str {
         match self {
-            Scope::EveryRustSourceUnderCrates => "every Rust source under crates/",
+            Scope::EveryRustSourceUnderCratesAndTheHarness => {
+                "every Rust source under crates/ and harness/"
+            }
             Scope::CratesOtherThanTheForeignInterface => {
                 "every Rust source under crates/ except crates/indexwerk-ffi/"
             }
@@ -141,8 +151,9 @@ impl Scope {
     /// slashes, is inside this scope.
     pub fn covers(self, relative_path: &str) -> bool {
         let rust = relative_path.starts_with("crates/") && relative_path.ends_with(".rs");
+        let harness = relative_path.starts_with(HARNESS_PACKAGE) && relative_path.ends_with(".rs");
         match self {
-            Scope::EveryRustSourceUnderCrates => rust,
+            Scope::EveryRustSourceUnderCratesAndTheHarness => rust || harness,
             Scope::CratesOtherThanTheForeignInterface => {
                 rust && !relative_path.starts_with(FOREIGN_INTERFACE_CRATE)
             }
@@ -257,6 +268,10 @@ pub const FOREIGN_INTERFACE_CRATE: &str = "crates/indexwerk-ffi/";
 
 /// The core.
 pub const CORE_CRATE: &str = "crates/indexwerk-core/";
+
+/// The hardware-bound harness, which is a package in this tree and not a member
+/// of the workspace.
+pub const HARNESS_PACKAGE: &str = "harness/";
 
 /// The crates that reach a consumer.
 pub const SHIPPED_CRATES: &[&str] = &[
