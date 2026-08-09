@@ -16,7 +16,7 @@ rather than of that one. Issue #41 is where the set was argued.
 | No floating point types in the core crate | docs/adr/0007-exact-arithmetic.md, issue #9 | `crates/indexwerk-core/` |
 | No socket, name resolution, network client or process spawn in a shipped crate | docs/adr/0008-nothing-leaves-the-host.md, issue #36 | `crates/indexwerk-core/, crates/indexwerk-ffi/ and crates/indexwerk-python/` |
 | No panic path in a library crate | issue #41 | `src/ of every crate, outside #[cfg(test)] regions` |
-| No test that binds off loopback, touches a certificate store, installs a service or asks for elevation | issue #17 | `every Rust source under crates/` |
+| No test that binds off loopback, touches a certificate store, installs a service or asks for elevation | issue #17 | `every Rust source under crates/ and harness/` |
 | No performance number in tracked documentation without its source nearby | issue #31 | `README.md and docs/` |
 
 ## What a finding says

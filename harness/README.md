@@ -81,10 +81,18 @@ compile this crate, so a change to the workspace that breaks it is not caught
 until somebody builds it here. Its own suite is what catches that, and running
 it is the line at the top of the table's last column.
 
-The greppable invariants of `docs/invariants.md` do not read this directory
-either. Their scopes name `crates/`, `docs/` and `README.md`, and none of the
-three reaches `harness/`. The headless and unelevated requirement is the one
-that matters most here, because this is the directory whose legs are allowed to
-want hardware: they are allowed to want cores, features, memory and a licence,
-and they are still not allowed to want elevation. Nothing scans this directory
-for that today, and that gap is real rather than covered.
+One greppable invariant of `docs/invariants.md` does read this directory, and it
+is the one that matters most here, because this is the directory whose legs are
+allowed to want hardware: they are allowed to want cores, features, memory and a
+licence, and they are not allowed to want elevation. The headless and unelevated
+rule of issue #17 reads every Rust source here on the same terms it reads the
+crates, so moving a test in here does not move it out of that rule's reach. The
+walk that opens these files is asserted rather than assumed, because with no
+violation in this directory dropping it again would change nothing else.
+
+The other invariants do not reach here, and one of those absences is worth
+knowing about rather than deducing. This file is neither `README.md` nor under
+`docs/`, so the rule that refuses a performance number with no source nearby
+does not read it, and this is the directory whose whole purpose is producing
+numbers. What stands in its place is `render` in `src/lib.rs`, which refuses a
+result rather than the prose about one.

@@ -7,7 +7,7 @@ use std::collections::BTreeSet;
 use std::fs;
 
 use indexwerk_checks::terms::INVARIANTS;
-use indexwerk_checks::{catalogue_markdown, scan_workspace, workspace_root};
+use indexwerk_checks::{catalogue_markdown, files_the_scan_reads, scan_workspace, workspace_root};
 
 const CATALOGUE: &str = "docs/invariants.md";
 
@@ -89,6 +89,42 @@ fn the_scan_actually_reached_the_sources_and_the_documentation() {
     assert!(
         documents >= INVARIANTS.len(),
         "expected the walk to reach the documentation directory, reached {documents} file(s)"
+    );
+}
+
+#[test]
+fn the_walk_opens_the_harness_as_well_as_the_workspace() {
+    // The leg above counts what is on disk, which is not the same as what the
+    // walk opened, and the difference is the whole of this one. `harness/` is
+    // outside the workspace on purpose, so it is the directory a walk written
+    // around `cargo metadata` would miss, and the miss would be silent: with
+    // no violation there, dropping it changes no other test.
+    let read = files_the_scan_reads();
+    assert!(
+        read.iter().any(|path| path == "harness/src/lib.rs"),
+        "the walk did not open the harness; it opened {read:?}"
+    );
+    assert!(
+        read.iter().any(|path| path == "harness/tests/refusal.rs"),
+        "the walk did not open the harness suite; it opened {read:?}"
+    );
+    assert!(
+        read.iter()
+            .any(|path| path == "crates/indexwerk-core/src/lib.rs"),
+        "the walk did not open the core"
+    );
+    // Build output is not source, and the harness has its own.
+    assert!(
+        !read.iter().any(|path| path.contains("/target/")),
+        "the walk descended into build output"
+    );
+    // The exclusions are applied by the walk rather than after it, so a file
+    // named there is never opened at all.
+    assert!(
+        !read
+            .iter()
+            .any(|path| path == "crates/indexwerk-checks/src/terms.rs"),
+        "the walk opened a file the exclusion list names"
     );
 }
 

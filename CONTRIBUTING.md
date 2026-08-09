@@ -48,11 +48,19 @@ has to contain the constructs and a proof that it bites has to feed them in:
 text back to the scanner under a different name to show the exclusion is load
 bearing rather than decorative.
 
-The scan reads `crates/`, `docs/` and `README.md`, and none of those reaches
-`harness/`, so nothing scans the harness for the constructs above. The legs
-there are allowed to want cores, a processor feature, memory and a licence.
-They are still not allowed to want elevation, and today that is a sentence
-rather than a check.
+The scan reads `harness/` as well, for this rule and for no other. The legs
+there are allowed to want cores, a processor feature, memory and a licence, and
+they are not allowed to want elevation, so a test moved out of the default suite
+into the harness meets the same refusal it met before it moved. That was a
+sentence rather than a check until the scope was widened, and the fixtures
+proving it fires there are in `crates/indexwerk-checks/tests/bites.rs`.
+
+The other invariants stop at `crates/`, `docs/` and `README.md`. The harness is
+not a shipped crate and nothing in it reaches a consumer, so the unsafe, the
+floating point, the egress and the panic-path rules are not about it. The
+documentation rule is a different case: `harness/README.md` is neither
+`README.md` nor under `docs/`, so a performance number written there is read by
+nothing, and that gap is real rather than covered.
 
 ## The hardware-bound harness
 
