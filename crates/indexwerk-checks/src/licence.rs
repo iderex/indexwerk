@@ -28,15 +28,17 @@ use crate::workspace_root;
 
 /// The identifier every manifest in this tree declares.
 ///
-/// The strict spelling rather than `AGPL-3.0-or-later`, because that is what
-/// `LICENSE` and the readme say between them: the readme states version 3 and
-/// names no later one, and the `or (at your option) any later version` line in
-/// the appendix of `LICENSE` is the notice that document tells a program to
-/// attach to its own sources, which nothing in this tree does yet. Widening it
-/// is a decision rather than a reading, it belongs to #2 with the answer that
-/// chose the licence, and it is one constant here plus the manifests this check
-/// then reds until they follow.
-pub const IDENTIFIER: &str = "AGPL-3.0-only";
+/// The `-or-later` spelling, answered on 2026-08-09 in #2 for every board
+/// carrying this licence. What stood here argued the strict spelling from what
+/// `LICENSE` and the readme said between them, and said that widening it was a
+/// decision rather than a reading, held by #2 with the answer that chose the
+/// licence. That answer arrived. The readme states version 3 or any later
+/// version in the same change, so the two still say one thing.
+///
+/// The other spelling is a narrower grant rather than a second way of writing
+/// this one, which is why it is a fixture the suite refuses rather than a
+/// spelling read as equivalent.
+pub const IDENTIFIER: &str = "AGPL-3.0-or-later";
 
 /// The file at the root carrying the terms the identifier names.
 pub const LICENCE_FILE: &str = "LICENSE";

@@ -123,19 +123,23 @@ fn a_manifest_declaring_another_identifier_is_refused() {
     }
 }
 
-/// The one-character mistake somebody will actually make: the `-or-later`
-/// spelling of the same licence, in one manifest and not in the others.
+/// The mistake somebody will actually make: the `-only` spelling of the same
+/// licence, in one manifest and not in the others. It is the exact string every
+/// manifest here carried until the answer of 2026-08-09 widened the grant, so a
+/// manifest copied from an older revision of this tree, or a crate whose key was
+/// written from memory, arrives spelled this way and is a narrower grant than
+/// the one offered.
 #[test]
 fn the_neighbouring_spelling_of_the_same_licence_is_refused() {
     let manifests = vec![
         a_root(),
         (
             "crates/a/Cargo.toml".to_owned(),
-            Some("[package]\nname = \"a\"\nlicense = \"AGPL-3.0-or-later\"\n".to_owned()),
+            Some("[package]\nname = \"a\"\nlicense = \"AGPL-3.0-only\"\n".to_owned()),
         ),
     ];
     match judge(&manifests, Some(&the_licence())).as_slice() {
-        [Wrong::Another { declared, .. }] => assert_eq!(declared, "AGPL-3.0-or-later"),
+        [Wrong::Another { declared, .. }] => assert_eq!(declared, "AGPL-3.0-only"),
         other => panic!("a neighbouring spelling has to be refused, got {other:?}"),
     }
 }
