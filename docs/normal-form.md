@@ -190,8 +190,9 @@ fast canonicaliser returning the wrong representative.
 
 [`../conformance/order/permutations.txt`](../conformance/order/permutations.txt)
 lists signed permutations of widths zero to three in ascending order under this
-rule, one per line, written as the sign and then the width and image array. It
-opens:
+rule, one per line, written as the sign and then the width and image array.
+
+The file opens:
 
     + 0:
     - 0:
