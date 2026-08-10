@@ -6,20 +6,26 @@
 //! environment variable, prints nothing, and starts no thread pool the caller
 //! did not ask for. The rule and its reasons are in `docs/adr/0005-layering.md`.
 //!
-//! Nothing here implements an algorithm yet. The permutation engine arrives in
-//! M4 and the canonicaliser in M5. What does exist is the data they will work
-//! on: [`expression`] holds the index expression model of #24, and
-//! [`rational`] the exact coefficient it carries.
+//! The data the algorithms work on: [`expression`] holds the index expression
+//! model of #24, and [`rational`] the exact coefficient it carries.
+//!
+//! Of the algorithms themselves, the lowest layer is here. [`permutation`]
+//! holds the permutation type, its sign and the total order the canonical form
+//! is a minimum in, which is #20. What is above it is not: the base and strong
+//! generating set, the orbit and stabiliser operations, and the double coset
+//! search are the rest of M4 and M5, and none of them is in this crate yet.
 
 pub mod expression;
+pub mod permutation;
 pub mod rational;
 
 /// A placeholder so the scaffolding builds and is tested before any algorithm
 /// exists.
 ///
 /// It returns the number of layers this workspace is cut into, which is the one
-/// fact about the tree that the scaffolding itself establishes. It is replaced
-/// by the permutation engine in M4 and carries no meaning until then.
+/// fact about the tree that the scaffolding itself establishes. Nothing depends
+/// on it and it carries no meaning; it goes when the canonicaliser has an entry
+/// point for a caller to reach instead.
 pub fn layers() -> u32 {
     3
 }
