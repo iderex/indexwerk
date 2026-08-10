@@ -7,7 +7,12 @@
 //! did not ask for. The rule and its reasons are in `docs/adr/0005-layering.md`.
 //!
 //! Nothing here implements an algorithm yet. The permutation engine arrives in
-//! M4 and the canonicaliser in M5.
+//! M4 and the canonicaliser in M5. What does exist is the data they will work
+//! on: [`expression`] holds the index expression model of #24, and
+//! [`rational`] the exact coefficient it carries.
+
+pub mod expression;
+pub mod rational;
 
 /// A placeholder so the scaffolding builds and is tested before any algorithm
 /// exists.
