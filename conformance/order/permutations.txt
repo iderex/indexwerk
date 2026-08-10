@@ -1,0 +1,42 @@
+# Signed permutations in ascending order under section 7 of
+# ../../docs/normal-form.md. Read by the test suite; quoted by that document.
+#
+# One per line: the sign, a space, the width, a colon, and the image array as
+# decimal points separated by commas. Width zero has an empty image array, so
+# the line ends at the colon. A line starting with # is a comment and a blank
+# line is skipped.
+#
+# The order is width first, then the image array position by position, then the
+# sign with + before - before 0. Every width from zero to three is listed in
+# full, so a comparison that gets any of the three components wrong disagrees
+# with this file somewhere in it.
++ 0:
+- 0:
+0 0:
++ 1:0
+- 1:0
+0 1:0
++ 2:0,1
+- 2:0,1
+0 2:0,1
++ 2:1,0
+- 2:1,0
+0 2:1,0
++ 3:0,1,2
+- 3:0,1,2
+0 3:0,1,2
++ 3:0,2,1
+- 3:0,2,1
+0 3:0,2,1
++ 3:1,0,2
+- 3:1,0,2
+0 3:1,0,2
++ 3:1,2,0
+- 3:1,2,0
+0 3:1,2,0
++ 3:2,0,1
+- 3:2,0,1
+0 3:2,0,1
++ 3:2,1,0
+- 3:2,1,0
+0 3:2,1,0

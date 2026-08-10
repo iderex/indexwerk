@@ -27,9 +27,23 @@ index expression carries no carriage return and no meaningful trailing
 whitespace, so these files are ordinary text under `.gitattributes` and are not
 exempted from it.
 
-The concrete syntax of the expressions is part of the normal form document
-rather than of this readme, because it is the same syntax that document uses to
-quote a case, and a syntax described in two places drifts.
+The concrete syntax of the expressions is settled by
+[`../docs/normal-form.md`](../docs/normal-form.md) rather than by this readme,
+because it is the same syntax that document uses to quote a case. That document
+names where the grammar is written rather than carrying a second copy of it, for
+the reason a syntax described in two places drifts.
+
+## The order fixtures
+
+`order/` is the other kind of file here, and it is not a vector file. It holds
+the orderings of [`../docs/normal-form.md`](../docs/normal-form.md) written out
+as data: a list in ascending order, which an implementation of that order is
+sorted against. It exists because an order stated only in prose is an order two
+people read two ways, and because the document quoting a fixture and the suite
+reading a different one is the drift both are meant to prevent.
+
+`order/permutations.txt` is the first of them, quoted by section 7 of that
+document.
 
 ## What reads it
 
@@ -42,6 +56,12 @@ A second reader is owed by [#8](https://github.com/iderex/indexwerk/issues/8),
 which runs the same set at several thread counts and compares the outputs byte
 for byte.
 
-Neither reader exists today, and neither does a vector file. This directory
-holds this readme and nothing else, so a green test run says nothing at all
-about conformance yet.
+Neither reader exists today, and neither does a vector file. So a green test run
+says nothing at all about conformance yet.
+
+The order fixtures are read separately, by the crate that implements the order
+they describe. `order/permutations.txt` is owed a reader by
+[#20](https://github.com/iderex/indexwerk/issues/20), which is where the
+permutation type and its order are built. That reader is a different one from
+the two above and it says nothing about conformance either: it compares an order
+against a written order, not a canonicaliser against an expected output.
