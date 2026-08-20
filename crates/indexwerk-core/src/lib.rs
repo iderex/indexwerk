@@ -9,15 +9,18 @@
 //! The data the algorithms work on: [`expression`] holds the index expression
 //! model of #24, and [`rational`] the exact coefficient it carries.
 //!
-//! Of the algorithms themselves, the lowest layer is here. [`permutation`]
-//! holds the permutation type, its sign and the total order the canonical form
-//! is a minimum in, which is #20. What is above it is not: the base and strong
-//! generating set, the orbit and stabiliser operations, and the double coset
-//! search are the rest of M4 and M5, and none of them is in this crate yet.
+//! Of the algorithms themselves, the lowest two layers are here.
+//! [`permutation`] holds the permutation type, its sign and the total order the
+//! canonical form is a minimum in, which is #20, and [`stabiliser_chain`] turns
+//! a handful of generators into a base, a strong generating set and the chain
+//! a group is searched through, which is #21. What is above them is not: the
+//! orbit and stabiliser operations and the double coset search are the rest of
+//! M4 and M5, and neither is in this crate yet.
 
 pub mod expression;
 pub mod permutation;
 pub mod rational;
+pub mod stabiliser_chain;
 
 /// A placeholder so the scaffolding builds and is tested before any algorithm
 /// exists.
