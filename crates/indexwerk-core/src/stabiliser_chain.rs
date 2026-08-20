@@ -187,7 +187,6 @@ impl StabiliserChain {
             }
         }
 
-
         let identity = Permutation::identity(width);
         let moving: Vec<Permutation> = generators
             .into_iter()
